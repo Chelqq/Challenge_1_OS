@@ -7,43 +7,43 @@ if [ "$#" -ne 6 ]; then
 fi
 
 # Variables
-NOMBRE_VM=$1
-TIPO_SO=$2
-NUM_CPUS=$3
+VM_NAME=$1
+OS_TYPE=$2
+CORES_2_USE=$3
 MEMORIA_GB=$4
 VRAM_MB=$5
-TAMANIO_DISCO_GB=$6
-CONTROLADOR_SATA="SATAController"
-CONTROLADOR_IDE="IDEController"
+DISK_SIZE=$6
+SATA_CONTROLLER="SATAController"
+IDE_CONTROLLER="IDEController"
 
-# Paso 1: Crear VM
-VBoxManage createvm --name "$NOMBRE_VM" --ostype "$TIPO_SO" --register
+echo _1: Crear VM
+VBoxManage createvm --name "$VM_NAME" --ostype "$OS_TYPE" --register
 
-# Paso 2: Configurar VM
-VBoxManage modifyvm "$NOMBRE_VM" --cpus "$NUM_CPUS"
-VBoxManage modifyvm "$NOMBRE_VM" --memory "$MEMORIA_GB"GB
-VBoxManage modifyvm "$NOMBRE_VM" --vram "$VRAM_MB"MB
+echo _2: Configurar VM
+VBoxManage modifyvm "$VM_NAME" --cpus "$CORES_2_USE"
+VBoxManage modifyvm "$VM_NAME" --memory "$MEMORIA_GB"GB
+VBoxManage modifyvm "$VM_NAME" --vram "$VRAM_MB"MB
 
-# Paso 3: Crear disco duro virtual
-VBoxManage createmedium disk --filename "$NOMBRE_VM/$NOMBRE_VM.vdi" --size "$TAMANIO_DISCO_GB"GB --format VDI
+echo _3: Crear disco duro virtual
+VBoxManage createmedium disk --filename "$VM_NAME/$VM_NAME.vdi" --size "$DISK_SIZE"GB --format VDI
 
-# Paso 4: Crear y asociar controlador SATA
-VBoxManage storagectl "$NOMBRE_VM" --name "$CONTROLADOR_SATA" --add sata
-VBoxManage storageattach "$NOMBRE_VM" --storagectl "$CONTROLADOR_SATA" --port 0 --device 0 --type hdd --medium "$NOMBRE_VM/$NOMBRE_VM.vdi"
+echo _4: Crear y asociar controlador SATA
+VBoxManage storagectl "$VM_NAME" --name "$SATA_CONTROLLER" --add sata
+VBoxManage storageattach "$VM_NAME" --storagectl "$SATA_CONTROLLER" --port 0 --device 0 --type hdd --medium "$VM_NAME/$VM_NAME.vdi"
 
-# Paso 5: Crear y asociar controlador IDE
-VBoxManage storagectl "$NOMBRE_VM" --name "$CONTROLADOR_IDE" --add ide
-VBoxManage storageattach "$NOMBRE_VM" --storagectl "$CONTROLADOR_IDE" --port 0 --device 0 --type dvddrive --medium emptydrive
+echo _5: Crear y asociar controlador IDE
+VBoxManage storagectl "$VM_NAME" --name "$IDE_CONTROLLER" --add ide
+VBoxManage storageattach "$VM_NAME" --storagectl "$IDE_CONTROLLER" --port 0 --device 0 --type dvddrive --medium emptydrive
 
-# Paso 6: Imprimir configuración
+echo _6: Imprimir configuración
 echo "Configuración de la Máquina Virtual:"
-VBoxManage showvminfo "$NOMBRE_VM"
+VBoxManage showvminfo "$VM_NAME"
 
 echo "Configuración del Disco Duro Virtual:"
-VBoxManage showmediuminfo disk "$NOMBRE_VM/$NOMBRE_VM.vdi"
+VBoxManage showmediuminfo disk "$VM_NAME/$VM_NAME.vdi"
 
 echo "Configuración del Controlador SATA:"
-VBoxManage storagectl "$NOMBRE_VM" --name "$CONTROLADOR_SATA" --portcount 1 --remove
+VBoxManage storagectl "$VM_NAME" --name "$SATA_CONTROLLER" --portcount 1 --remove
 
 echo "Configuración del Controlador IDE:"
-VBoxManage storagectl "$NOMBRE_VM" --name "$CONTROLADOR_IDE" --portcount 1 --remove
+VBoxManage storagectl "$VM_NAME" --name "$IDE_CONTROLLER" --portcount 1 --remove
